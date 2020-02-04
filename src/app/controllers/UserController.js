@@ -23,6 +23,20 @@ class UserController {
 
     return response.status(200).json(user);
   }
+
+  async store(request, response) {
+    const user = await User.findOne({ where: { email: request.body.email } });
+
+    if (user) {
+      return response
+        .status(401)
+        .json({ error: `e-mail ${user.email} is not available.` });
+    }
+
+    const { id, name, email, admin } = await User.create(request.body);
+
+    return response.status(201).json({ id, name, email, admin });
+  }
 }
 
 export default new UserController();
