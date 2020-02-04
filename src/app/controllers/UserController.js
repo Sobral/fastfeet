@@ -80,19 +80,22 @@ class UserController {
         password ? field.required().oneOf([Yup.ref('password')]) : field
       ),
       admin: Yup.boolean(),
+      id: Yup.number(),
     });
 
-    const schemaValid = await schema.isValid(request.body);
+    const schemaBodyValid = await schema.isValid(request.body);
+    const schemaParamValid = await schema.isValid(request.params);
+    const schemaValid = schemaBodyValid && schemaParamValid;
 
     if (!schemaValid) {
       return response.status(400).json({ error: 'Fail to validade request.' });
     }
 
-    const id = request.UserID;
+    const { id } = request.params;
 
     const { email, oldPassword } = request.body;
 
-    const user = await User.findByPk(id);
+    const user = await User.findOne({ where: { id } });
 
     if (email && email !== user.email) {
       const userExist = await User.findOne({ where: { email } });
