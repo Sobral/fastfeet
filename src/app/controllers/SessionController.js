@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import Yup from 'yup';
+import * as Yup from 'yup';
 import User from '../models/User';
 import authConfig from '../../config/auth';
 
@@ -33,14 +33,14 @@ class SessionController {
 
     const { id, name } = user;
     const { secretKey, expiresIn } = authConfig;
-    const token = jwt.sign({ id }, secretKey, { expiresIn });
+
     return response.json({
       user: {
         id,
         name,
         email,
       },
-      token,
+      token: jwt.sign({ id }, secretKey, { expiresIn }),
     });
   }
 }
