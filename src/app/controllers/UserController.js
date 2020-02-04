@@ -38,6 +38,21 @@ class UserController {
   }
 
   async store(request, response) {
+    const schema = Yup.object().shape({
+      name: Yup.string().required(),
+      email: Yup.string()
+        .email()
+        .required(),
+      password: Yup.string().required(),
+      admin: Yup.boolean(),
+    });
+
+    const schemaValid = await schema.isValid(request.body);
+
+    if (!schemaValid) {
+      return response.status(400).json({ error: 'Fail to validade request.' });
+    }
+
     const user = await User.findOne({ where: { email: request.body.email } });
 
     if (user) {
