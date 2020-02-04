@@ -65,6 +65,59 @@ class UserController {
 
     return response.status(201).json({ id, name, email, admin });
   }
+
+  async update(request, response) {
+    const schema = Yup.object().shape({
+      name: Yup.string(),
+      email: Yup.string().email(),
+      oldPassword: Yup.string().min(6),
+      password: Yup.string()
+        .min(6)
+        .when('oldPassword', (oldPassword, field) =>
+          oldPassword ? field.required() : field
+        ),
+      confirmPassword: Yup.string().when('password', (password, field) =>
+        password ? field.required().oneOf([Yup.ref('password')]) : field
+      ),
+      admin: Yup.boolean(),
+    });
+
+    const schemaValid = await schema.isValid(request.body);
+
+    if (!schemaValid) {
+      return response.status(400).json({ error: 'Fail to validade request.' });
+    }
+
+    const id = request.UserID;
+
+    const { email, oldPassword } = request.body;
+
+    const user = await User.findByPk(id);
+
+    if (email && email !== user.email) {
+      const userExist = await User.findOne({ where: { email } });
+      if (userExist) {
+        return response.status(400).json({ error: 'User already exist!' });
+      }
+    }
+
+    if (oldPassword) {
+      const passwordMatches = await user.checkPassword(oldPassword);
+
+      if (!passwordMatches) {
+        return response.status(401).json({ error: 'Password does not match!' });
+      }
+    }
+
+    await user.update(request.body);
+
+    return response.status(201).json({
+      id,
+      name: user.name,
+      email: user.email,
+      admin: user.admin,
+    });
+  }
 }
 
 export default new UserController();
