@@ -24,6 +24,22 @@ class RecipientController {
 
     return response.json(recipient);
   }
+
+  async index(request, response) {
+    const recipients = await Recipient.findAll({
+      attributes: [
+        'name',
+        'rua',
+        'numero',
+        'complemento',
+        'cidade',
+        'estado',
+        'cep',
+      ],
+    });
+
+    return response.status(200).json(recipients);
+  }
 }
 
 export default new RecipientController();
