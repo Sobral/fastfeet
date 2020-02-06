@@ -28,6 +28,7 @@ class RecipientController {
   async index(request, response) {
     const recipients = await Recipient.findAll({
       attributes: [
+        'id',
         'name',
         'rua',
         'numero',
