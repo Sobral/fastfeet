@@ -40,6 +40,40 @@ class RecipientController {
 
     return response.status(200).json(recipients);
   }
+
+  async show(request, response) {
+    const schema = Yup.object().shape({
+      id: Yup.number(),
+    });
+
+    const schemaValid = await schema.isValid(request.params);
+
+    if (!schemaValid) {
+      return response.status(400).json({ error: 'Fail to validade request.' });
+    }
+    const { id } = request.params;
+
+    const recipient = await Recipient.findOne(
+      { where: { id } },
+      {
+        attributes: [
+          'name',
+          'rua',
+          'numero',
+          'complemento',
+          'cidade',
+          'estado',
+          'cep',
+        ],
+      }
+    );
+
+    if (!recipient) {
+      return response.status(401).json({ error: 'Recipient not found.' });
+    }
+
+    return response.status(200).json(recipient);
+  }
 }
 
 export default new RecipientController();
